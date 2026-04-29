@@ -1,42 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Deskly - Tickets</title>
+    <title>Deskly - Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f9f9f9; color: #333; }
+        .navbar { background: #2c3e50; color: white; padding: 0.8rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .container { padding: 2rem; max-width: 1000px; margin: auto; }
+        .section { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+        h3 { color: #2c3e50; margin-top: 0; border-bottom: 2px solid #f4f7f6; padding-bottom: 10px; }
+        .form-group { display: flex; gap: 10px; margin-top: 15px; }
+        input, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 4px; flex: 1; }
+        button { padding: 10px 25px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button.search-btn { background: #3498db; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; margin-top: 10px; }
+        th, td { padding: 14px 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+        tr:hover { background: #fcfcfc; }
+        .logout { color: #e74c3c; text-decoration: none; font-weight: bold; margin-left: 15px; border-left: 1px solid #555; padding-left: 15px; }
+    </style>
 </head>
 <body>
-    <h2>Sistem Gestionare Tichete</h2>
-    <p>Esti logat cu ID-ul: {{ session['user_id'] }} | <a href="/logout">Logout</a></p>
+    <div class="navbar">
+        <div style="font-size: 1.2rem; font-weight: bold;">Deskly <span style="font-weight: 300; font-size: 0.9rem;">| Support Portal</span></div>
+        <div>
+            <span style="font-size: 0.9rem; opacity: 0.8;">ID Sesiune: {{ session['user_id'] }}</span>
+            <a href="/logout" class="logout">Iesire</a>
+        </div>
+    </div>
 
-    <h3>Adauga Tichet Nou</h3>
-    <form method="POST">
-        <input type="text" name="title" placeholder="Titlu Tichet" required><br><br>
-        <textarea name="description" placeholder="Descriere"></textarea><br><br>
-        <button type="submit">Creeaza</button>
-    </form>
+    <div class="container">
+        <div class="section">
+            <h3>Adaugare Tichet Rapid</h3>
+            <form method="POST" class="form-group">
+                <input type="text" name="title" placeholder="Titlu problema" required>
+                <input type="text" name="description" placeholder="Scurta descriere">
+                <button type="submit">Creeaza</button>
+            </form>
+        </div>
 
-    <hr>
+        <div class="section">
+            <h3>Cauta in Sistem</h3>
+            <form method="GET" action="/tickets" class="form-group">
+                <input type="text" name="search" placeholder="Cauta dupa cuvinte cheie din titlu...">
+                <button type="submit" class="search-btn">Filtreaza</button>
+            </form>
+        </div>
 
-    <h3>Cauta Tichete</h3>
-    <form method="GET" action="/tickets">
-        <input type="text" name="search" placeholder="Cauta dupa titlu...">
-        <button type="submit">Cauta</button>
-    </form>
-
-    <table border="1">
-        <tr>
-            <th>ID</th>
-            <th>Titlu</th>
-            <th>Descriere</th>
-            <th>Proprietar (ID)</th>
-        </tr>
-        {% for ticket in tickets %}
-        <tr>
-            <td>{{ ticket['id'] }}</td>
-            <td>{{ ticket['title'] }}</td>
-            <td>{{ ticket['description'] }}</td>
-            <td>{{ ticket['owner_id'] }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+        <div class="section" style="padding: 0;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Titlu Tichet</th>
+                        <th>Descriere Detaliata</th>
+                        <th>ID Proprietar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                    <tr>
+                        <td style="font-weight: bold; color: #7f8c8d;">#{{ ticket['id'] }}</td>
+                        <td style="font-weight: 500;">{{ ticket['title'] }}</td>
+                        <td style="color: #666;">{{ ticket['description'] }}</td>
+                        <td><span style="background: #ebf5fb; color: #2980b9; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">User {{ ticket['owner_id'] }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </body>
 </html>
