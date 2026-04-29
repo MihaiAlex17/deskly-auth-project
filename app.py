@@ -7,7 +7,9 @@ import secrets
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 app.secret_key = secrets.token_hex(24)
-
+# Setari de securitate pentru cookie-uri
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 def get_db_connection():
     conn = sqlite3.connect('authx.db')
     conn.row_factory = sqlite3.Row
