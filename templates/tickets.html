@@ -4,7 +4,7 @@
     <title>Deskly - Tickets</title>
 </head>
 <body>
-    <h2>Sistem Gestionare Tichete (v1)</h2>
+    <h2>Sistem Gestionare Tichete</h2>
     <p>Esti logat cu ID-ul: {{ session['user_id'] }} | <a href="/logout">Logout</a></p>
 
     <h3>Adauga Tichet Nou</h3>
@@ -16,7 +16,7 @@
 
     <hr>
 
-    <h3>Cauta Tichete (Vulnerabil SQL Injection)</h3>
+    <h3>Cauta Tichete</h3>
     <form method="GET" action="/tickets">
         <input type="text" name="search" placeholder="Cauta dupa titlu...">
         <button type="submit">Cauta</button>
