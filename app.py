@@ -36,7 +36,7 @@ def register():
         # Noua validare: lungime + litera mare + cifra
         if not is_password_strong(password):
             return "Eroare: Parola trebuie sa aiba minim 8 caractere, o litera mare si o cifra!"
-
+        # Hash-uim parola inainte de a o stoca
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         role = 'ANALYST'
 
@@ -52,27 +52,45 @@ def register():
             conn.close()
     return render_template('register.html')
 
+from datetime import datetime, timedelta
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        now = datetime.now()
 
         conn = get_db_connection()
         user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+
+        if user:
+            # VERIFICARE: Este contul sub blocare temporara?
+            if user['lockout_until']:
+                lockout_time = datetime.strptime(user['lockout_until'], '%Y-%m-%d %H:%M:%S.%f')
+                if now < lockout_time:
+                    conn.close()
+                    return f"Cont suspendat temporar. Incearca din nou dupa {lockout_time.strftime('%H:%M:%S')}."
+
+            if user['password_hash'] == password:
+                # SUCCES: Resetam contoarele
+                conn.execute('UPDATE users SET failed_logins = 0, lockout_until = NULL WHERE id = ?', (user['id'],))
+                conn.commit()
+            else:
+                # ESEC: Incrementam si verificam pragul
+                new_fails = user['failed_logins'] + 1
+                lockout_date = None
+                if new_fails >= 5:
+                    lockout_date = now + timedelta(minutes=15) # Blocat 15 min
+                
+                conn.execute('UPDATE users SET failed_logins = ?, lockout_until = ? WHERE id = ?', 
+                             (new_fails, lockout_date, user['id']))
+                conn.commit()
+                return "Email sau parola incorecta!"
+        
         conn.close()
-
-        if user and user['locked']:
-            return "Eroare: Acest cont a fost blocat din motive de securitate."
-
-        if user and bcrypt.check_password_hash(user['password_hash'], password):
-            session['user_id'] = user['id']
-            session['email'] = user['email']
-            session['role'] = user['role']
-            log_action(user['id'], 'LOGIN_SUCCESS', 'auth')
-            return redirect(url_for('tickets'))
-        else:
-            return "Eroare: Email sau parola incorecta!"
+        # Daca nu gasim user sau parola e gresita, raspundem generic pentru a nu oferi indicii
+        return "Email sau parola incorecta!"
 
     return render_template('login.html')
 

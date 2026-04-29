@@ -13,7 +13,8 @@ def init_db():
             password_hash TEXT NOT NULL,          
             role TEXT CHECK(role IN ('ANALYST', 'MANAGER')) DEFAULT 'ANALYST',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
-            locked BOOLEAN DEFAULT 0              
+            failed_logins INTEGER DEFAULT 0,      
+        lockout_until TIMESTAMP                          
         )
     ''')
 
