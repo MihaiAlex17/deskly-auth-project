@@ -123,6 +123,7 @@ def forgot_password():
 
 @app.route('/reset-password', methods=['GET', 'POST'])
 def reset_password():
+    conn = get_db_connection()
     token = request.args.get('token')
     if not token:
         return "Eroare: Token invalid!"
@@ -135,6 +136,7 @@ def reset_password():
             return "Eroare: Parola noua trebuie sa aiba minim 8 caractere, o litera mare si o cifra!"
             
         hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+        conn.execute('UPDATE users SET password_hash = ? WHERE reset_token = ?', (hashed_password, token))
         return "Parola a fost actualizata in siguranta! <a href='/login'>Login</a>"
     
     return render_template('reset_password.html', token=token)
