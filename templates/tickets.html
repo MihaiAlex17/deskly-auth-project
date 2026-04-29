@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deskly - Tickets</title>
+</head>
+<body>
+    <h2>Sistem Gestionare Tichete (v1)</h2>
+    <p>Esti logat cu ID-ul: {{ session['user_id'] }} | <a href="/logout">Logout</a></p>
+
+    <h3>Adauga Tichet Nou</h3>
+    <form method="POST">
+        <input type="text" name="title" placeholder="Titlu Tichet" required><br><br>
+        <textarea name="description" placeholder="Descriere"></textarea><br><br>
+        <button type="submit">Creeaza</button>
+    </form>
+
+    <hr>
+
+    <h3>Cauta Tichete (Vulnerabil SQL Injection)</h3>
+    <form method="GET" action="/tickets">
+        <input type="text" name="search" placeholder="Cauta dupa titlu...">
+        <button type="submit">Cauta</button>
+    </form>
+
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Titlu</th>
+            <th>Descriere</th>
+            <th>Proprietar (ID)</th>
+        </tr>
+        {% for ticket in tickets %}
+        <tr>
+            <td>{{ ticket['id'] }}</td>
+            <td>{{ ticket['title'] }}</td>
+            <td>{{ ticket['description'] }}</td>
+            <td>{{ ticket['owner_id'] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
