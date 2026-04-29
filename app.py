@@ -5,7 +5,7 @@ import datetime
 app = Flask(__name__)
 # Cheie secreta pentru sesiuni (in v1 este vulnerabila fiind hardcodata)
 app.secret_key = '1234'
-
+app.config['SESSION_COOKIE_HTTPONLY'] = False
 # Functie pentru conectarea la baza de date
 def get_db_connection():
     conn = sqlite3.connect('authx.db')
