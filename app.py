@@ -37,7 +37,8 @@ def register():
         
         # Noua validare: lungime + litera mare + cifra
         if not is_password_strong(password):
-            return "Eroare: Parola trebuie sa aiba minim 8 caractere, o litera mare si o cifra!"
+            flash('Eroare: Parola trebuie sa aiba minim 8 caractere, o litera mare si o cifra!', 'danger')
+            return render_template('register.html')
         # Hash-uim parola inainte de a o stoca
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         role = 'ANALYST'
@@ -49,7 +50,8 @@ def register():
             conn.commit()
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
-            return 'Eroare: Acest email este deja inregistrat.'
+            flash('Eroare: Acest email este deja inregistrat.', 'danger')
+            return render_template('register.html')
         finally:
             conn.close()
     return render_template('register.html')
@@ -73,7 +75,8 @@ def login():
                 lockout_time = datetime.strptime(user['lockout_until'], '%Y-%m-%d %H:%M:%S.%f')
                 if now < lockout_time:
                     conn.close()
-                    return f"Cont suspendat temporar. Incearca din nou dupa {lockout_time.strftime('%H:%M:%S')}."
+                    flash(f"Cont suspendat temporar. Incearca din nou dupa {lockout_time.strftime('%H:%M:%S')}.", 'warning')
+                    return render_template('login.html')
 
             # VERIFICARE PAROLA: Folosim bcrypt pentru a compara hash-ul
             if bcrypt.check_password_hash(user['password_hash'], password):
@@ -97,11 +100,13 @@ def login():
                              (new_fails, lockout_date, user['id']))
                 conn.commit()
                 conn.close()
-                return "Email sau parola incorecta!"
+                flash('Email sau parola incorecta.', 'warning')
+                return render_template('login.html')
 
         # Daca user-ul nu exista, raspundem generic pentru a evita User Enumeration
         conn.close()
-        return "Email sau parola incorecta!"
+        flash('Email sau parola incorecta.', 'warning')
+        return render_template('login.html')
 
     return render_template('login.html')
 

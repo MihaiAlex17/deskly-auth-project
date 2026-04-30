@@ -12,11 +12,36 @@
         .links { margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px; }
         a { color: #3498db; text-decoration: none; font-size: 0.85rem; display: block; margin-top: 8px; }
         a:hover { text-decoration: underline; }
+        
+        /* Stil nou pentru mesaje de eroare */
+        .alert {
+            padding: 10px;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            list-style: none;
+            text-align: left;
+        }
+        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     </style>
 </head>
 <body>
     <div class="card">
         <h2>Autentificare</h2>
+
+        <!-- AICI SE ADAUGA LOGICA PENTRU FLASH -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category if category else 'danger' }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        <!-- SFARSIT SECTIUNE FLASH -->
+
         <form action="/login" method="POST">
             <input type="text" name="email" placeholder="Email" required>
             <input type="password" name="password" placeholder="Parola" required>
