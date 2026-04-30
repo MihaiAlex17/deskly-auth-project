@@ -57,6 +57,7 @@ def register():
 from datetime import datetime, timedelta
 
 @app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form['email']
@@ -74,24 +75,32 @@ def login():
                     conn.close()
                     return f"Cont suspendat temporar. Incearca din nou dupa {lockout_time.strftime('%H:%M:%S')}."
 
-            if user['password_hash'] == password:
-                # SUCCES: Resetam contoarele
+            # VERIFICARE PAROLA: Folosim bcrypt pentru a compara hash-ul
+            if bcrypt.check_password_hash(user['password_hash'], password):
+                # SUCCES: Resetam contoarele si cream sesiunea
                 conn.execute('UPDATE users SET failed_logins = 0, lockout_until = NULL WHERE id = ?', (user['id'],))
                 conn.commit()
+                conn.close()
+                
+                session['user_id'] = user['id']
+                session['email'] = user['email']
+                return redirect(url_for('tickets'))
             else:
-                # ESEC: Incrementam si verificam pragul
+                # ESEC: Incrementam incercarile si verificam pragul de 5
                 new_fails = user['failed_logins'] + 1
                 lockout_date = None
+                
                 if new_fails >= 5:
                     lockout_date = now + timedelta(minutes=15) # Blocat 15 min
                 
-                conn.execute('UPDATE users SET failed_logins = ?, lockout_until = ? WHERE id = ?', 
+                conn.execute('UPDATE users SET failed_logins = ?, lockout_until = ? WHERE id = ?',
                              (new_fails, lockout_date, user['id']))
                 conn.commit()
+                conn.close()
                 return "Email sau parola incorecta!"
-        
+
+        # Daca user-ul nu exista, raspundem generic pentru a evita User Enumeration
         conn.close()
-        # Daca nu gasim user sau parola e gresita, raspundem generic pentru a nu oferi indicii
         return "Email sau parola incorecta!"
 
     return render_template('login.html')
