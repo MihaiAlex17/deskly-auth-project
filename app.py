@@ -47,7 +47,7 @@ def register():
             conn.execute('INSERT INTO users (email, password_hash, role) VALUES (?, ?, ?)',
                          (email, hashed_password, role))
             conn.commit()
-            return 'Cont creat cu succes! <a href="/login">Logheaza-te aici</a>'
+            return redirect(url_for('login'))
         except sqlite3.IntegrityError:
             return 'Eroare: Acest email este deja inregistrat.'
         finally:
